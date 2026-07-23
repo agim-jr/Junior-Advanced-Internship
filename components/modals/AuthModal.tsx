@@ -59,7 +59,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       await signInAsGuest();
       onClose();
-      router.push('/for-you'); 
+      router.push('/for-you');
     } catch (err: any) {
       setError(err.message || 'Guest login failed');
     } finally {
