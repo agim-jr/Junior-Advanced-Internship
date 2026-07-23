@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { X } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -17,8 +18,8 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [loading, setLoading] = useState(false);
 
   const { signIn, signUp, signInAsGuest } = useAuth();
+  const router = useRouter();
 
-  
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
@@ -44,6 +45,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
       onClose();
       setEmail('');
       setPassword('');
+      router.push('/for-you');
     } catch (err: any) {
       setError(err.message || 'An error occurred');
     } finally {
@@ -57,6 +59,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
     try {
       await signInAsGuest();
       onClose();
+      router.push('/for-you'); 
     } catch (err: any) {
       setError(err.message || 'Guest login failed');
     } finally {
@@ -95,7 +98,6 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
 
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-
           <button
             onClick={onClose}
             className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
@@ -103,11 +105,9 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <X className="w-6 h-6" />
           </button>
 
-
           <h2 className="text-2xl font-bold text-gray-900 mb-6">
             {isLogin ? 'Log in to Summarist' : 'Sign up to Summarist'}
           </h2>
-
 
           <button
             onClick={handleGuestLogin}
@@ -123,7 +123,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
             <div className="border-t border-gray-300 grow"></div>
           </div>
 
-         <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
                 {error}
