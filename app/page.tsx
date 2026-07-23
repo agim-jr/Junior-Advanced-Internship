@@ -1,3 +1,6 @@
+'use client';
+
+import { useState } from "react";
 import Image from "next/image";
 import {
   AiFillFileText,
@@ -7,11 +10,16 @@ import {
 import { BiCrown } from "react-icons/bi";
 import { BsStarFill, BsStarHalf } from "react-icons/bs";
 import { RiLeafLine } from "react-icons/ri";
+import AuthModal from "@/components/modals/AuthModal";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Home() {
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const { user, logout } = useAuth();
+
   return (
     <>
-      {/* Navbar */}
+      
       <nav className="nav">
         <div className="nav__wrapper">
           <figure className="nav__img--mask">
@@ -24,7 +32,26 @@ export default function Home() {
             />
           </figure>
           <ul className="nav__list--wrapper">
-            <li className="nav__list nav__list--login">Login</li>
+            {user ? (
+              <>
+                <li className="nav__list nav__list--login">
+                  <span className="mr-4">{user.email}</span>
+                </li>
+                <li
+                  className="nav__list nav__list--login cursor-pointer"
+                  onClick={logout}
+                >
+                  Logout
+                </li>
+              </>
+            ) : (
+              <li
+                className="nav__list nav__list--login cursor-pointer"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                Login
+              </li>
+            )}
             <li className="nav__list nav__list--mobile">About</li>
             <li className="nav__list nav__list--mobile">Contact</li>
             <li className="nav__list nav__list--mobile">Help</li>
@@ -32,7 +59,7 @@ export default function Home() {
         </div>
       </nav>
 
-      {/* Landing Section */}
+
       <section className="container">
         <div className="row">
           <div className="landing__wrapper">
@@ -48,7 +75,12 @@ export default function Home() {
                 <br className="remove--tablet" />
                 and even people who don&apos;t like to read.
               </p>
-              <button className="btn home__cta--btn">Login</button>
+              <button
+                className="btn home__cta--btn"
+                onClick={() => setIsAuthModalOpen(true)}
+              >
+                {user ? 'Go to Library' : 'Login'}
+              </button>
             </div>
             <figure className="landing__image--mask">
               <Image
@@ -62,7 +94,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Features Section */}
+
       <section className="container">
         <div className="row">
           <h2 className="section__title">Understand books in few minutes</h2>
@@ -99,7 +131,7 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Statistics Sections */}
+
           <div className="statistics__wrapper">
             <div className="statistics__content--header">
               <div className="statistics__heading">Enhance your knowledge</div>
@@ -169,7 +201,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Reviews Section */}
+
       <section className="container">
         <div className="row">
           <h2 className="section__title">What our members say</h2>
@@ -234,12 +266,17 @@ export default function Home() {
           </div>
 
           <div className="reviews__btn--wrapper">
-            <button className="btn home__cta--btn">Login</button>
+            <button
+              className="btn home__cta--btn"
+              onClick={() => setIsAuthModalOpen(true)}
+            >
+              {user ? 'Go to Library' : 'Login'}
+            </button>
           </div>
         </div>
       </section>
 
-      {/* Numbers Section */}
+
       <section className="container">
         <div className="row">
           <h2 className="section__title">Start growing with Summarist now</h2>
@@ -279,7 +316,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Footer */}
+
       <footer id="footer">
         <div className="row">
           <div className="footer__top--wrapper">
@@ -353,6 +390,12 @@ export default function Home() {
           </div>
         </div>
       </footer>
+
+
+      <AuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+      />
     </>
   );
 }
