@@ -53,7 +53,6 @@ export default function ChoosePlanPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow">
         <div className="max-w-6xl mx-auto px-4 py-4">
           <button
@@ -65,7 +64,6 @@ export default function ChoosePlanPage() {
         </div>
       </div>
 
-      {/* Hero Section */}
       <div className="max-w-4xl mx-auto px-4 py-12 text-center">
         <h1 className="text-4xl font-bold mb-4">
           Get unlimited access to many amazing books to read
@@ -91,14 +89,12 @@ export default function ChoosePlanPage() {
         </div>
       </div>
 
-      {/* Plan Selection */}
       <div className="max-w-2xl mx-auto px-4 pb-12">
         <h2 className="text-3xl font-bold text-center mb-8">
           Choose the plan that fits you
         </h2>
 
         <div className="space-y-4 mb-8">
-          {/* Yearly Plan */}
           <div
             onClick={() => setSelectedPlan('yearly')}
             className={`bg-white rounded-lg p-6 cursor-pointer transition border-2 ${
@@ -133,7 +129,6 @@ export default function ChoosePlanPage() {
             </div>
           </div>
 
-          {/* Monthly Plan */}
           <div
             onClick={() => setSelectedPlan('monthly')}
             className={`bg-white rounded-lg p-6 cursor-pointer transition border-2 ${
@@ -169,7 +164,6 @@ export default function ChoosePlanPage() {
           </div>
         </div>
 
-        {/* CTA Button */}
         <button
           onClick={handleStartTrial}
           className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
@@ -184,7 +178,6 @@ export default function ChoosePlanPage() {
             "Cancel your trial at any time before it ends, and you won't be charged."}
         </p>
 
-        {/* FAQ Section */}
         <div className="mt-12">
           <div className="space-y-4">
             {faqs.map((faq, index) => (
