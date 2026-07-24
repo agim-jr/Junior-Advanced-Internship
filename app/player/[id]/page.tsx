@@ -75,9 +75,10 @@ export default function PlayerPage() {
     }
   }, [bookId]);
 
+  // Fixed: Add book.audioLink to dependency array
   useEffect(() => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !book?.audioLink) return;
 
     const updateTime = () => setCurrentTime(audio.currentTime);
     const updateDuration = () => setDuration(audio.duration);
@@ -87,23 +88,33 @@ export default function PlayerPage() {
     audio.addEventListener('loadedmetadata', updateDuration);
     audio.addEventListener('ended', handleEnded);
 
+    // Force load metadata
+    audio.load();
+
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
       audio.removeEventListener('ended', handleEnded);
     };
-  }, [book]);
+  }, [book?.audioLink]); // Changed dependency
 
-  const togglePlayPause = () => {
+  // Fixed: Handle promise rejection
+  const togglePlayPause = async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    if (isPlaying) {
-      audio.pause();
-    } else {
-      audio.play();
+    try {
+      if (isPlaying) {
+        audio.pause();
+        setIsPlaying(false);
+      } else {
+        await audio.play();
+        setIsPlaying(true);
+      }
+    } catch (error) {
+      console.error('Error playing audio:', error);
+      setIsPlaying(false);
     }
-    setIsPlaying(!isPlaying);
   };
 
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -119,7 +130,9 @@ export default function PlayerPage() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + seconds));
+    const newTime = audio.currentTime + seconds;
+    audio.currentTime = Math.max(0, Math.min(duration, newTime));
+    setCurrentTime(audio.currentTime); // Added: Update state immediately
   };
 
   const changeSpeed = () => {
@@ -134,7 +147,7 @@ export default function PlayerPage() {
   };
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds)) return '0:00';
+    if (isNaN(seconds) || !isFinite(seconds)) return '0:00'; // Added isFinite check
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -396,7 +409,7 @@ export default function PlayerPage() {
 
               {activeTab === 'audio' && (
                 <div>
-                  <audio ref={audioRef} src={book.audioLink} />
+                  <audio ref={audioRef} src={book.audioLink} preload="metadata" />
 
                   <div style={{
                     backgroundColor: '#f3f4f6',

@@ -19,7 +19,7 @@ export default function SearchBar() {
   const [showResults, setShowResults] = useState(false);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [hoveredClear, setHoveredClear] = useState(false);
-  const debounceTimer = useRef<NodeJS.Timeout>();
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null); // Fixed here
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 

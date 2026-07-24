@@ -16,6 +16,7 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [hoveredElement, setHoveredElement] = useState<string | null>(null);
 
   const { signIn, signUp, signInAsGuest } = useAuth();
   const router = useRouter();
@@ -70,119 +71,242 @@ export default function AuthModal({ isOpen, onClose }: AuthModalProps) {
   if (!isOpen) return null;
 
   return (
-    <>
-      <style jsx global>{`
-        .modal-overlay {
-          position: fixed;
-          top: 0;
-          left: 0;
-          right: 0;
-          bottom: 0;
-          background-color: rgba(0, 0, 0, 0.5);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          z-index: 9999;
-          padding: 1rem;
-        }
-        .modal-content {
-          position: relative;
-          background: white;
-          border-radius: 0.5rem;
-          box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-          width: 100%;
-          max-width: 28rem;
-          padding: 1.5rem;
-        }
-      `}</style>
+    <div
+      style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 9999,
+        padding: '1rem',
+      }}
+      onClick={onClose}
+    >
+      <div
+        style={{
+          position: 'relative',
+          background: 'white',
+          borderRadius: '0.5rem',
+          boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+          width: '100%',
+          maxWidth: '28rem',
+          padding: '1.5rem',
+        }}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <button
+          onClick={onClose}
+          onMouseEnter={() => setHoveredElement('close')}
+          onMouseLeave={() => setHoveredElement(null)}
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            right: '1rem',
+            color: hoveredElement === 'close' ? '#4b5563' : '#9ca3af',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: 0,
+            display: 'flex',
+            alignItems: 'center',
+            transition: 'color 0.2s',
+          }}
+        >
+          <X style={{ width: '1.5rem', height: '1.5rem' }} />
+        </button>
 
-      <div className="modal-overlay" onClick={onClose}>
-        <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-          <button
-            onClick={onClose}
-            className="absolute top-4 right-4 text-gray-400 hover:text-gray-600 transition"
-          >
-            <X className="w-6 h-6" />
-          </button>
+        <h2
+          style={{
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#111827',
+            marginBottom: '1.5rem',
+          }}
+        >
+          {isLogin ? 'Log in to Summarist' : 'Sign up to Summarist'}
+        </h2>
 
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            {isLogin ? 'Log in to Summarist' : 'Sign up to Summarist'}
-          </h2>
+        <button
+          onClick={handleGuestLogin}
+          disabled={loading}
+          onMouseEnter={() => setHoveredElement('guest')}
+          onMouseLeave={() => setHoveredElement(null)}
+          style={{
+            width: '100%',
+            padding: '0.75rem',
+            marginBottom: '1rem',
+            backgroundColor: hoveredElement === 'guest' && !loading ? '#e5e7eb' : '#f3f4f6',
+            color: '#111827',
+            fontWeight: '600',
+            borderRadius: '0.375rem',
+            border: 'none',
+            cursor: loading ? 'not-allowed' : 'pointer',
+            opacity: loading ? 0.5 : 1,
+            transition: 'background-color 0.2s',
+          }}
+        >
+          {loading ? 'Loading...' : 'Login as Guest'}
+        </button>
 
-          <button
-            onClick={handleGuestLogin}
-            disabled={loading}
-            className="w-full py-3 mb-4 bg-gray-100 hover:bg-gray-200 text-gray-900 font-semibold rounded-md transition disabled:opacity-50"
-          >
-            {loading ? 'Loading...' : 'Login as Guest'}
-          </button>
+        <div
+          style={{
+            position: 'relative',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            margin: '1rem 0',
+          }}
+        >
+          <div style={{ borderTop: '1px solid #d1d5db', flexGrow: 1 }}></div>
+          <span style={{ padding: '0 1rem', fontSize: '0.875rem', color: '#6b7280' }}>or</span>
+          <div style={{ borderTop: '1px solid #d1d5db', flexGrow: 1 }}></div>
+        </div>
 
-          <div className="relative flex items-center justify-center my-4">
-            <div className="border-t border-gray-300 grow"></div>
-            <span className="px-4 text-sm text-gray-500">or</span>
-            <div className="border-t border-gray-300 grow"></div>
-          </div>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {error && (
-              <div className="p-3 bg-red-50 border border-red-200 text-red-600 rounded-md text-sm">
-                {error}
-              </div>
-            )}
-
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                Email
-              </label>
-              <input
-                type="email"
-                id="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="john@example.com"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
-                Password
-              </label>
-              <input
-                type="password"
-                id="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                minLength={6}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-green-500"
-                placeholder="At least 6 characters"
-              />
-            </div>
-
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full py-3 bg-green-600 hover:bg-green-700 text-white font-semibold rounded-md transition disabled:opacity-50"
-            >
-              {loading ? 'Loading...' : isLogin ? 'Login' : 'Sign Up'}
-            </button>
-          </form>
-
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => {
-                setIsLogin(!isLogin);
-                setError('');
+        <form onSubmit={handleSubmit}>
+          {error && (
+            <div
+              style={{
+                padding: '0.75rem',
+                backgroundColor: '#fef2f2',
+                border: '1px solid #fecaca',
+                color: '#dc2626',
+                borderRadius: '0.375rem',
+                fontSize: '0.875rem',
+                marginBottom: '1rem',
               }}
-              className="text-sm text-green-600 hover:text-green-700 font-medium"
             >
-              {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Login'}
-            </button>
+              {error}
+            </div>
+          )}
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              htmlFor="email"
+              style={{
+                display: 'block',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '0.25rem',
+              }}
+            >
+              Email
+            </label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              placeholder="john@example.com"
+              style={{
+                width: '100%',
+                padding: '0.5rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                outline: 'none',
+                fontSize: '1rem',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#10b981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
           </div>
+
+          <div style={{ marginBottom: '1rem' }}>
+            <label
+              htmlFor="password"
+              style={{
+                display: 'block',
+                fontSize: '0.875rem',
+                fontWeight: '500',
+                color: '#374151',
+                marginBottom: '0.25rem',
+              }}
+            >
+              Password
+            </label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={6}
+              placeholder="At least 6 characters"
+              style={{
+                width: '100%',
+                padding: '0.5rem 1rem',
+                border: '1px solid #d1d5db',
+                borderRadius: '0.375rem',
+                outline: 'none',
+                fontSize: '1rem',
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = '#10b981';
+                e.target.style.boxShadow = '0 0 0 3px rgba(16, 185, 129, 0.1)';
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = '#d1d5db';
+                e.target.style.boxShadow = 'none';
+              }}
+            />
+          </div>
+
+          <button
+            type="submit"
+            disabled={loading}
+            onMouseEnter={() => setHoveredElement('submit')}
+            onMouseLeave={() => setHoveredElement(null)}
+            style={{
+              width: '100%',
+              padding: '0.75rem',
+              backgroundColor: hoveredElement === 'submit' && !loading ? '#059669' : '#10b981',
+              color: 'white',
+              fontWeight: '600',
+              borderRadius: '0.375rem',
+              border: 'none',
+              cursor: loading ? 'not-allowed' : 'pointer',
+              opacity: loading ? 0.5 : 1,
+              transition: 'background-color 0.2s',
+            }}
+          >
+            {loading ? 'Loading...' : isLogin ? 'Login' : 'Sign Up'}
+          </button>
+        </form>
+
+        <div style={{ marginTop: '1rem', textAlign: 'center' }}>
+          <button
+            onClick={() => {
+              setIsLogin(!isLogin);
+              setError('');
+            }}
+            onMouseEnter={() => setHoveredElement('toggle')}
+            onMouseLeave={() => setHoveredElement(null)}
+            style={{
+              fontSize: '0.875rem',
+              color: hoveredElement === 'toggle' ? '#059669' : '#10b981',
+              fontWeight: '500',
+              background: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              transition: 'color 0.2s',
+            }}
+          >
+            {isLogin ? "Don't have an account? Sign up" : 'Already have an account? Login'}
+          </button>
         </div>
       </div>
-    </>
+    </div>
   );
 }
