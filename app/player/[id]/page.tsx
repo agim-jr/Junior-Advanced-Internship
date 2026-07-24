@@ -34,23 +34,19 @@ export default function PlayerPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Audio player state
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
 
-  // Tab state
   const [activeTab, setActiveTab] = useState<'summary' | 'audio'>('summary');
 
-  // Redirect if not logged in
   useEffect(() => {
     if (!authLoading && !user) {
       router.push('/');
     }
   }, [user, authLoading, router]);
 
-  // Fetch book
   useEffect(() => {
     async function fetchBook() {
       try {
@@ -78,7 +74,6 @@ export default function PlayerPage() {
     }
   }, [bookId]);
 
-  // Audio event listeners
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -98,7 +93,6 @@ export default function PlayerPage() {
     };
   }, [book]);
 
-  // Play/Pause toggle
   const togglePlayPause = () => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -111,7 +105,6 @@ export default function PlayerPage() {
     setIsPlaying(!isPlaying);
   };
 
-  // Seek audio
   const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -121,7 +114,6 @@ export default function PlayerPage() {
     setCurrentTime(newTime);
   };
 
-  // Skip forward/backward
   const skip = (seconds: number) => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -129,7 +121,6 @@ export default function PlayerPage() {
     audio.currentTime = Math.max(0, Math.min(duration, audio.currentTime + seconds));
   };
 
-  // Change playback speed
   const changeSpeed = () => {
     const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
     const currentIndex = speeds.indexOf(playbackRate);
@@ -141,7 +132,6 @@ export default function PlayerPage() {
     }
   };
 
-  // Format time (seconds to MM:SS)
   const formatTime = (seconds: number) => {
     if (isNaN(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
@@ -151,22 +141,53 @@ export default function PlayerPage() {
 
   if (isLoading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading...</div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: '256px',
+        transition: 'margin-left 0.3s ease',
+      }}
+      className="loading-container">
+        <div style={{ fontSize: '1.25rem' }}>Loading...</div>
       </div>
     );
   }
 
   if (error || !book || !user) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: '256px',
+        transition: 'margin-left 0.3s ease',
+      }}
+      className="error-container">
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#dc2626',
+            marginBottom: '16px',
+          }}>
             {error || 'Book not found'}
           </h2>
           <button
             onClick={() => router.push('/for-you')}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            style={{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              padding: '8px 24px',
+              borderRadius: '4px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
             Back to Home
           </button>
@@ -176,158 +197,378 @@ export default function PlayerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-white shadow sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div style={{
+        backgroundColor: 'white',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 10,
+      }}>
+        <div style={{
+          maxWidth: '1152px',
+          margin: '0 auto',
+          padding: '16px',
+          marginLeft: '256px',
+          transition: 'margin-left 0.3s ease',
+        }}
+        className="header-content">
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '16px',
+          }}>
             <button
               onClick={() => router.back()}
-              className="text-blue-600 hover:text-blue-800 flex items-center gap-2"
+              style={{
+                color: '#2563eb',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                fontSize: '1rem',
+                whiteSpace: 'nowrap',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#1e40af'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#2563eb'}
             >
               ← Back
             </button>
-            <h1 className="text-xl font-bold truncate mx-4">{book.title}</h1>
-            <div className="w-20"></div>
+            <h1 style={{
+              fontSize: '1.25rem',
+              fontWeight: 'bold',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+              flex: 1,
+              textAlign: 'center',
+            }}>
+              {book.title}
+            </h1>
+            <div style={{ width: '80px' }}></div>
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className="max-w-6xl mx-auto px-4 py-8">
-        {/* Book Info Card */}
-        <div className="bg-white rounded-lg shadow-lg p-6 mb-8">
-          <div className="flex gap-6">
-            <img
-              src={book.imageLink}
-              alt={book.title}
-              className="w-32 h-48 object-cover rounded shadow"
-            />
-            <div className="flex-1">
-              <h2 className="text-2xl font-bold mb-2">{book.title}</h2>
-              <p className="text-gray-600 mb-1">{book.author}</p>
-              <p className="text-sm text-gray-500 mb-4">{book.subTitle}</p>
-              <div className="flex items-center gap-4 text-sm text-gray-600">
-                <div className="flex items-center gap-1">
-                  <span className="text-yellow-500">★</span>
-                  <span>{book.averageRating}</span>
+      <div style={{
+        marginLeft: '256px',
+        transition: 'margin-left 0.3s ease',
+      }}
+      className="main-content">
+        <div style={{
+          maxWidth: '1152px',
+          margin: '0 auto',
+          padding: '32px 16px',
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            padding: '24px',
+            marginBottom: '32px',
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: '24px',
+              flexWrap: 'wrap',
+            }}
+            className="book-info-flex">
+              <img
+                src={book.imageLink}
+                alt={book.title}
+                style={{
+                  width: '128px',
+                  height: '192px',
+                  objectFit: 'cover',
+                  borderRadius: '4px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <h2 style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  marginBottom: '8px',
+                  color: '#111827',
+                }}>
+                  {book.title}
+                </h2>
+                <p style={{
+                  color: '#6b7280',
+                  marginBottom: '4px',
+                }}>
+                  {book.author}
+                </p>
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: '#9ca3af',
+                  marginBottom: '16px',
+                }}>
+                  {book.subTitle}
+                </p>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '16px',
+                  fontSize: '0.875rem',
+                  color: '#6b7280',
+                  flexWrap: 'wrap',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span style={{ color: '#eab308' }}>★</span>
+                    <span>{book.averageRating}</span>
+                  </div>
+                  <div>⏱ {book.keyIdeas} Key Ideas</div>
                 </div>
-                <div>⏱️ {book.keyIdeas} Key Ideas</div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Tabs */}
-        <div className="bg-white rounded-lg shadow-lg mb-8">
-          <div className="flex border-b">
-            <button
-              onClick={() => setActiveTab('summary')}
-              className={`flex-1 px-6 py-4 font-semibold transition ${
-                activeTab === 'summary'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              📖 Summary
-            </button>
-            <button
-              onClick={() => setActiveTab('audio')}
-              className={`flex-1 px-6 py-4 font-semibold transition ${
-                activeTab === 'audio'
-                  ? 'text-blue-600 border-b-2 border-blue-600'
-                  : 'text-gray-600 hover:text-gray-800'
-              }`}
-            >
-              🎧 Audio
-            </button>
-          </div>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            marginBottom: '32px',
+          }}>
+            <div style={{
+              display: 'flex',
+              borderBottom: '1px solid #e5e7eb',
+            }}>
+              <button
+                onClick={() => setActiveTab('summary')}
+                style={{
+                  flex: 1,
+                  padding: '16px 24px',
+                  fontWeight: '600',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: activeTab === 'summary' ? '#2563eb' : '#6b7280',
+                  borderBottom: activeTab === 'summary' ? '2px solid #2563eb' : 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseOver={(e) => {
+                  if (activeTab !== 'summary') e.currentTarget.style.color = '#374151';
+                }}
+                onMouseOut={(e) => {
+                  if (activeTab !== 'summary') e.currentTarget.style.color = '#6b7280';
+                }}
+              >
+                📝 Summary
+              </button>
+              <button
+                onClick={() => setActiveTab('audio')}
+                style={{
+                  flex: 1,
+                  padding: '16px 24px',
+                  fontWeight: '600',
+                  backgroundColor: 'transparent',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: activeTab === 'audio' ? '#2563eb' : '#6b7280',
+                  borderBottom: activeTab === 'audio' ? '2px solid #2563eb' : 'none',
+                  transition: 'color 0.2s',
+                }}
+                onMouseOver={(e) => {
+                  if (activeTab !== 'audio') e.currentTarget.style.color = '#374151';
+                }}
+                onMouseOut={(e) => {
+                  if (activeTab !== 'audio') e.currentTarget.style.color = '#6b7280';
+                }}
+              >
+                🎧 Audio
+              </button>
+            </div>
 
-          {/* Tab Content */}
-          <div className="p-8">
-            {activeTab === 'summary' && (
-              <div className="prose max-w-none">
-                <div className="whitespace-pre-line text-gray-700 leading-relaxed">
-                  {book.summary}
+            <div style={{ padding: '32px' }}>
+              {activeTab === 'summary' && (
+                <div>
+                  <div style={{
+                    whiteSpace: 'pre-line',
+                    color: '#374151',
+                    lineHeight: '1.75',
+                    fontSize: '1rem',
+                  }}>
+                    {book.summary}
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
 
-            {activeTab === 'audio' && (
-              <div>
-                {/* Audio Player */}
-                <audio ref={audioRef} src={book.audioLink} />
+              {activeTab === 'audio' && (
+                <div>
+                  <audio ref={audioRef} src={book.audioLink} />
 
-                {/* Player Controls */}
-                <div className="bg-gray-100 rounded-lg p-6">
-                  {/* Progress Bar */}
-                  <div className="mb-4">
-                    <input
-                      type="range"
-                      min="0"
-                      max={duration || 0}
-                      value={currentTime}
-                      onChange={handleSeek}
-                      className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                    />
-                    <div className="flex justify-between text-sm text-gray-600 mt-2">
-                      <span>{formatTime(currentTime)}</span>
-                      <span>{formatTime(duration)}</span>
+                  <div style={{
+                    backgroundColor: '#f3f4f6',
+                    borderRadius: '8px',
+                    padding: '24px',
+                  }}>
+                    <div style={{ marginBottom: '16px' }}>
+                      <input
+                        type="range"
+                        min="0"
+                        max={duration || 0}
+                        value={currentTime}
+                        onChange={handleSeek}
+                        style={{
+                          width: '100%',
+                          height: '8px',
+                          backgroundColor: '#d1d5db',
+                          borderRadius: '8px',
+                          appearance: 'none',
+                          cursor: 'pointer',
+                          accentColor: '#2563eb',
+                        }}
+                      />
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        fontSize: '0.875rem',
+                        color: '#6b7280',
+                        marginTop: '8px',
+                      }}>
+                        <span>{formatTime(currentTime)}</span>
+                        <span>{formatTime(duration)}</span>
+                      </div>
+                    </div>
+
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '24px',
+                      flexWrap: 'wrap',
+                    }}>
+                      <button
+                        onClick={changeSpeed}
+                        style={{
+                          color: '#374151',
+                          fontWeight: '600',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                          fontSize: '1rem',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
+                      >
+                        {playbackRate}x
+                      </button>
+
+                      <button
+                        onClick={() => skip(-10)}
+                        style={{
+                          color: '#374151',
+                          fontSize: '1.5rem',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
+                      >
+                        ⏪
+                      </button>
+
+                      <button
+                        onClick={togglePlayPause}
+                        style={{
+                          width: '64px',
+                          height: '64px',
+                          backgroundColor: '#2563eb',
+                          color: 'white',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '1.875rem',
+                          border: 'none',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                      >
+                        {isPlaying ? '⏸' : '▶'}
+                      </button>
+
+                      <button
+                        onClick={() => skip(10)}
+                        style={{
+                          color: '#374151',
+                          fontSize: '1.5rem',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
+                      >
+                        ⏩
+                      </button>
+
+                      <button
+                        style={{
+                          color: '#374151',
+                          fontSize: '1.5rem',
+                          backgroundColor: 'transparent',
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
+                      >
+                        🔊
+                      </button>
                     </div>
                   </div>
 
-                  {/* Control Buttons */}
-                  <div className="flex items-center justify-center gap-6">
-                    {/* Speed Control */}
-                    <button
-                      onClick={changeSpeed}
-                      className="text-gray-700 hover:text-blue-600 font-semibold"
-                    >
-                      {playbackRate}x
-                    </button>
-
-                    {/* Rewind */}
-                    <button
-                      onClick={() => skip(-10)}
-                      className="text-gray-700 hover:text-blue-600 text-2xl"
-                    >
-                      ⏪
-                    </button>
-
-                    {/* Play/Pause */}
-                    <button
-                      onClick={togglePlayPause}
-                      className="w-16 h-16 bg-blue-600 text-white rounded-full flex items-center justify-center hover:bg-blue-700 text-3xl"
-                    >
-                      {isPlaying ? '⏸' : '▶'}
-                    </button>
-
-                    {/* Forward */}
-                    <button
-                      onClick={() => skip(10)}
-                      className="text-gray-700 hover:text-blue-600 text-2xl"
-                    >
-                      ⏩
-                    </button>
-
-                    {/* Volume (placeholder) */}
-                    <button className="text-gray-700 hover:text-blue-600 text-2xl">
-                      🔊
-                    </button>
+                  <div style={{
+                    marginTop: '24px',
+                    textAlign: 'center',
+                  }}>
+                    <p style={{ color: '#6b7280', marginBottom: '4px' }}>Now playing</p>
+                    <p style={{
+                      fontWeight: '600',
+                      fontSize: '1.125rem',
+                      marginBottom: '4px',
+                      color: '#111827',
+                    }}>
+                      {book.title}
+                    </p>
+                    <p style={{ color: '#9ca3af' }}>by {book.author}</p>
                   </div>
                 </div>
-
-                {/* Now Playing Info */}
-                <div className="mt-6 text-center">
-                  <p className="text-gray-600">Now playing</p>
-                  <p className="font-semibold text-lg">{book.title}</p>
-                  <p className="text-gray-500">by {book.author}</p>
-                </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 1024px) {
+          .loading-container,
+          .error-container,
+          .header-content,
+          .main-content {
+            margin-left: 0 !important;
+          }
+          .main-content {
+            padding-top: 60px;
+          }
+        }
+        @media (max-width: 640px) {
+          .book-info-flex {
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+          }
+        }
+      `}</style>
     </div>
   );
 }

@@ -33,7 +33,6 @@ export default function BookPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch book by ID
   useEffect(() => {
     async function fetchBook() {
       try {
@@ -68,11 +67,9 @@ export default function BookPage() {
     }
 
     if (book?.subscriptionRequired) {
-
       router.push('/choose-plan');
       return;
     }
-
 
     router.push(`/player/${bookId}`);
   };
@@ -83,28 +80,55 @@ export default function BookPage() {
       return;
     }
 
-
     alert('Added to library! (Feature coming soon)');
   };
 
   if (isLoading || authLoading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-xl">Loading book...</div>
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 'auto',
+      }}>
+        <div style={{ fontSize: '1.25rem' }}>Loading book...</div>
       </div>
     );
   }
 
   if (error || !book) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-red-600 mb-4">
+      <div style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        marginLeft: 'auto',
+      }}>
+        <div style={{ textAlign: 'center' }}>
+          <h2 style={{
+            fontSize: '1.5rem',
+            fontWeight: 'bold',
+            color: '#dc2626',
+            marginBottom: '16px'
+          }}>
             {error || 'Book not found'}
           </h2>
           <button
             onClick={() => router.push('/for-you')}
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
+            style={{
+              backgroundColor: '#2563eb',
+              color: 'white',
+              padding: '8px 24px',
+              borderRadius: '6px',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              fontWeight: '500',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
           >
             Back to Home
           </button>
@@ -114,114 +138,320 @@ export default function BookPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="max-w-6xl mx-auto px-4 py-8">
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: '#f9fafb',
+    }}>
+      <div style={{
+        marginLeft: '256px',
+        transition: 'margin-left 0.3s ease',
+      }}
+      className="book-page-content">
+        <div style={{
+          maxWidth: '1152px',
+          margin: '0 auto',
+          padding: '32px 16px',
+        }}>
+          <button
+            onClick={() => router.back()}
+            style={{
+              marginBottom: '24px',
+              color: '#2563eb',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.color = '#1e40af'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#2563eb'}
+          >
+            ← Back
+          </button>
 
-        <button
-          onClick={() => router.back()}
-          className="mb-6 text-blue-600 hover:text-blue-800 flex items-center gap-2"
-        >
-          ← Back
-        </button>
-
-
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <div className="flex flex-col md:flex-row gap-8">
-
-            <div className="shrink-0">
-              <img
-                src={book.imageLink}
-                alt={book.title}
-                className="w-64 h-96 object-cover rounded-lg shadow-lg"
-              />
-            </div>
-
-
-            <div className="flex-1">
-              <div className="mb-4">
-                {book.subscriptionRequired && (
-                  <span className="inline-block bg-yellow-400 text-yellow-900 text-xs font-semibold px-3 py-1 rounded-full mb-2">
-                    Premium
-                  </span>
-                )}
-                <h1 className="text-3xl font-bold mb-2">{book.title}</h1>
-                <p className="text-xl text-gray-600 mb-2">{book.subTitle}</p>
-                <p className="text-lg text-gray-700">By {book.author}</p>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            padding: '32px',
+            marginBottom: '32px',
+          }}>
+            <div style={{
+              display: 'flex',
+              gap: '32px',
+            }}
+            className="book-info-layout">
+              <div style={{ flexShrink: 0 }}>
+                <img
+                  src={book.imageLink}
+                  alt={book.title}
+                  style={{
+                    width: '256px',
+                    height: '384px',
+                    objectFit: 'cover',
+                    borderRadius: '8px',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+                  }}
+                  className="book-cover"
+                />
               </div>
 
-              <div className="flex items-center gap-6 mb-6 text-sm text-gray-600">
-                <div className="flex items-center gap-2">
-                  <span className="text-yellow-500">★</span>
-                  <span>
-                    {book.averageRating} ({book.totalRating} reviews)
-                  </span>
+              <div style={{ flex: 1 }}>
+                <div style={{ marginBottom: '16px' }}>
+                  {book.subscriptionRequired && (
+                    <span style={{
+                      display: 'inline-block',
+                      backgroundColor: '#fbbf24',
+                      color: '#78350f',
+                      fontSize: '0.75rem',
+                      fontWeight: '600',
+                      padding: '4px 12px',
+                      borderRadius: '9999px',
+                      marginBottom: '8px',
+                    }}>
+                      Premium
+                    </span>
+                  )}
+                  <h1 style={{
+                    fontSize: '1.875rem',
+                    fontWeight: 'bold',
+                    marginBottom: '8px',
+                    color: '#111827',
+                  }}>
+                    {book.title}
+                  </h1>
+                  <p style={{
+                    fontSize: '1.25rem',
+                    color: '#6b7280',
+                    marginBottom: '8px'
+                  }}>
+                    {book.subTitle}
+                  </p>
+                  <p style={{
+                    fontSize: '1.125rem',
+                    color: '#374151'
+                  }}>
+                    By {book.author}
+                  </p>
                 </div>
-                <div>⏱️ {book.keyIdeas} Key Ideas</div>
-                <div>📚 {book.type}</div>
-              </div>
 
-              <div className="flex flex-wrap gap-2 mb-6">
-                {book.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="bg-gray-200 text-gray-700 px-3 py-1 rounded-full text-sm"
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '24px',
+                  marginBottom: '24px',
+                  fontSize: '0.875rem',
+                  color: '#6b7280',
+                  flexWrap: 'wrap',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: '#fbbf24' }}>★</span>
+                    <span>
+                      {book.averageRating} ({book.totalRating} reviews)
+                    </span>
+                  </div>
+                  <div>⏱️ {book.keyIdeas} Key Ideas</div>
+                  <div>📚 {book.type}</div>
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '8px',
+                  marginBottom: '24px',
+                }}>
+                  {book.tags.map((tag, index) => (
+                    <span
+                      key={index}
+                      style={{
+                        backgroundColor: '#e5e7eb',
+                        color: '#374151',
+                        padding: '4px 12px',
+                        borderRadius: '9999px',
+                        fontSize: '0.875rem',
+                      }}
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '16px',
+                }}>
+                  <button
+                    onClick={() => handleReadOrListen('read')}
+                    style={{
+                      backgroundColor: '#2563eb',
+                      color: 'white',
+                      padding: '12px 32px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
                   >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              <div className="flex flex-wrap gap-4">
-                <button
-                  onClick={() => handleReadOrListen('read')}
-                  className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 font-semibold"
-                >
-                   Read
-                </button>
-                <button
-                  onClick={() => handleReadOrListen('listen')}
-                  className="bg-green-600 text-white px-8 py-3 rounded-lg hover:bg-green-700 font-semibold"
-                >
-                   Listen
-                </button>
-                <button
-                  onClick={handleAddToLibrary}
-                  className="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg hover:bg-gray-300 font-semibold"
-                >
-                  + Add to Library
-                </button>
+                    📖 Read
+                  </button>
+                  <button
+                    onClick={() => handleReadOrListen('listen')}
+                    style={{
+                      backgroundColor: '#16a34a',
+                      color: 'white',
+                      padding: '12px 32px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#15803d'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#16a34a'}
+                  >
+                    🎧 Listen
+                  </button>
+                  <button
+                    onClick={handleAddToLibrary}
+                    style={{
+                      backgroundColor: '#e5e7eb',
+                      color: '#374151',
+                      padding: '12px 32px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '1rem',
+                      fontWeight: '600',
+                      transition: 'background-color 0.2s',
+                    }}
+                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d1d5db'}
+                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                  >
+                    + Add to Library
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-4">About the Book</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {book.bookDescription}
-          </p>
-        </div>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            padding: '32px',
+            marginBottom: '32px',
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '16px',
+              color: '#111827',
+            }}>
+              About the Book
+            </h2>
+            <p style={{
+              color: '#374151',
+              lineHeight: '1.75',
+              whiteSpace: 'pre-line',
+            }}>
+              {book.bookDescription}
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-8 mb-8">
-          <h2 className="text-2xl font-bold mb-4">About the Author</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line">
-            {book.authorDescription}
-          </p>
-        </div>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            padding: '32px',
+            marginBottom: '32px',
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '16px',
+              color: '#111827',
+            }}>
+              About the Author
+            </h2>
+            <p style={{
+              color: '#374151',
+              lineHeight: '1.75',
+              whiteSpace: 'pre-line',
+            }}>
+              {book.authorDescription}
+            </p>
+          </div>
 
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <h2 className="text-2xl font-bold mb-4">Summary</h2>
-          <p className="text-gray-700 leading-relaxed whitespace-pre-line line-clamp-6">
-            {book.summary}
-          </p>
-          <button
-            onClick={() => handleReadOrListen('read')}
-            className="mt-4 text-blue-600 hover:text-blue-800 font-semibold"
-          >
-            Read full summary →
-          </button>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: '8px',
+            boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
+            padding: '32px',
+          }}>
+            <h2 style={{
+              fontSize: '1.5rem',
+              fontWeight: 'bold',
+              marginBottom: '16px',
+              color: '#111827',
+            }}>
+              Summary
+            </h2>
+            <p style={{
+              color: '#374151',
+              lineHeight: '1.75',
+              whiteSpace: 'pre-line',
+              display: '-webkit-box',
+              WebkitLineClamp: 6,
+              WebkitBoxOrient: 'vertical',
+              overflow: 'hidden',
+            }}>
+              {book.summary}
+            </p>
+            <button
+              onClick={() => handleReadOrListen('read')}
+              style={{
+                marginTop: '16px',
+                color: '#2563eb',
+                backgroundColor: 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '1rem',
+                fontWeight: '600',
+              }}
+              onMouseOver={(e) => e.currentTarget.style.color = '#1e40af'}
+              onMouseOut={(e) => e.currentTarget.style.color = '#2563eb'}
+            >
+              Read full summary →
+            </button>
+          </div>
         </div>
       </div>
+
+      <style jsx>{`
+        @media (max-width: 1024px) {
+          .book-page-content {
+            margin-left: 0 !important;
+            padding-top: 60px;
+          }
+          .book-info-layout {
+            flex-direction: column !important;
+            align-items: center !important;
+          }
+          .book-cover {
+            width: 100% !important;
+            max-width: 300px !important;
+            height: auto !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
