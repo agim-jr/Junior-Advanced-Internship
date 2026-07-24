@@ -33,6 +33,7 @@ export default function BookPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSaved, setIsSaved] = useState(false); // NEW STATE
 
   useEffect(() => {
     async function fetchBook() {
@@ -61,6 +62,17 @@ export default function BookPage() {
     }
   }, [bookId]);
 
+  useEffect(() => {
+    if (user && book) {
+      const existingBooks = localStorage.getItem(`library_${user.uid}`);
+      if (existingBooks) {
+        const savedBooks = JSON.parse(existingBooks);
+        const isBookSaved = savedBooks.some((b: Book) => b.id === book.id);
+        setIsSaved(isBookSaved);
+      }
+    }
+  }, [user, book]);
+
   const handleReadOrListen = (action: 'read' | 'listen') => {
     if (!user) {
       openAuthModal();
@@ -75,16 +87,40 @@ export default function BookPage() {
     router.push(`/player/${bookId}`);
   };
 
-  const handleAddToLibrary = () => {
+  const handleLibraryToggle = () => {
     if (!user) {
       openAuthModal();
       return;
     }
 
-    alert('Added to library! (Feature coming soon)');
+    if (!book) return;
+
+    try {
+      const existingBooks = localStorage.getItem(`library_${user.uid}`);
+      const savedBooks = existingBooks ? JSON.parse(existingBooks) : [];
+
+      if (isSaved) {
+        const updatedBooks = savedBooks.filter((b: Book) => b.id !== book.id);
+        localStorage.setItem(`library_${user.uid}`, JSON.stringify(updatedBooks));
+        setIsSaved(false);
+        alert('Removed from library!');
+      } else {
+        const bookToSave = {
+          ...book,
+          savedAt: new Date().toISOString(),
+          isFinished: false,
+        };
+        savedBooks.push(bookToSave);
+        localStorage.setItem(`library_${user.uid}`, JSON.stringify(savedBooks));
+        setIsSaved(true);
+        alert('Added to library!');
+      }
+    } catch (error) {
+      console.error('Error updating library:', error);
+      alert('Failed to update library');
+    }
   };
 
-  // Show skeleton while loading
   if (isLoading || authLoading) {
     return <SkeletonBookDetail />;
   }
@@ -312,10 +348,10 @@ export default function BookPage() {
                     🎧 Listen
                   </button>
                   <button
-                    onClick={handleAddToLibrary}
+                    onClick={handleLibraryToggle}
                     style={{
-                      backgroundColor: '#e5e7eb',
-                      color: '#374151',
+                      backgroundColor: isSaved ? '#dc2626' : '#e5e7eb',
+                      color: isSaved ? 'white' : '#374151',
                       padding: '12px 32px',
                       borderRadius: '8px',
                       border: 'none',
@@ -324,10 +360,14 @@ export default function BookPage() {
                       fontWeight: '600',
                       transition: 'background-color 0.2s',
                     }}
-                    onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#d1d5db'}
-                    onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e5e7eb'}
+                    onMouseOver={(e) => {
+                      e.currentTarget.style.backgroundColor = isSaved ? '#b91c1c' : '#d1d5db';
+                    }}
+                    onMouseOut={(e) => {
+                      e.currentTarget.style.backgroundColor = isSaved ? '#dc2626' : '#e5e7eb';
+                    }}
                   >
-                    + Add to Library
+                    {isSaved ? '✓ Remove from Library' : '+ Add to Library'}
                   </button>
                 </div>
               </div>

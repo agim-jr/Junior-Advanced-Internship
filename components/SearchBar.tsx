@@ -47,6 +47,7 @@ export default function SearchBar() {
 
     debounceTimer.current = setTimeout(async () => {
       setIsLoading(true);
+      setShowResults(true);
       try {
         const response = await fetch(
           `https://us-central1-summaristt.cloudfunctions.net/getBooksByAuthorOrTitle?search=${encodeURIComponent(
@@ -55,7 +56,6 @@ export default function SearchBar() {
         );
         const data = await response.json();
         setSearchResults(data || []);
-        setShowResults(true);
       } catch (error) {
         console.error('Search error:', error);
         setSearchResults([]);
@@ -82,6 +82,66 @@ export default function SearchBar() {
     setSearchResults([]);
     setShowResults(false);
   };
+
+  const SearchSkeleton = () => (
+    <div style={{ padding: '8px 0' }}>
+      {[...Array(5)].map((_, index) => (
+        <div
+          key={index}
+          style={{
+            padding: '12px 16px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px',
+          }}
+        >
+          <div
+            style={{
+              width: '48px',
+              height: '64px',
+              backgroundColor: '#e5e7eb',
+              borderRadius: '4px',
+              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            }}
+          />
+
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div
+              style={{
+                height: '20px',
+                width: '70%',
+                backgroundColor: '#e5e7eb',
+                borderRadius: '4px',
+                marginBottom: '8px',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }}
+            />
+            <div
+              style={{
+                height: '16px',
+                width: '50%',
+                backgroundColor: '#e5e7eb',
+                borderRadius: '4px',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }}
+            />
+          </div>
+
+          {index % 3 === 0 && (
+            <div
+              style={{
+                width: '64px',
+                height: '24px',
+                backgroundColor: '#e5e7eb',
+                borderRadius: '4px',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }}
+            />
+          )}
+        </div>
+      ))}
+    </div>
+  );
 
   return (
     <div
@@ -177,25 +237,7 @@ export default function SearchBar() {
           }}
         >
           {isLoading ? (
-            <div
-              style={{
-                padding: '32px',
-                textAlign: 'center',
-              }}
-            >
-              <div
-                style={{
-                  width: '32px',
-                  height: '32px',
-                  border: '2px solid #e5e7eb',
-                  borderTopColor: '#2563eb',
-                  borderRadius: '50%',
-                  margin: '0 auto 8px',
-                  animation: 'spin 1s linear infinite',
-                }}
-              />
-              <p style={{ color: '#6b7280' }}>Searching...</p>
-            </div>
+            <SearchSkeleton />
           ) : searchResults.length > 0 ? (
             <div style={{ padding: '8px 0' }}>
               {searchResults.map((book) => (
@@ -285,12 +327,12 @@ export default function SearchBar() {
       )}
 
       <style jsx>{`
-        @keyframes spin {
-          from {
-            transform: rotate(0deg);
+        @keyframes pulse {
+          0%, 100% {
+            opacity: 1;
           }
-          to {
-            transform: rotate(360deg);
+          50% {
+            opacity: 0.5;
           }
         }
       `}</style>
