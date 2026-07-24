@@ -2,25 +2,45 @@
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
+import { useState } from 'react';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const { user } = useAuth();
-  const [subscription, setSubscription] = useState<string>('Basic');
-  const [loading, setLoading] = useState(true);
+  const { user, subscriptionType, loading, refreshSubscription } = useAuth();
+  const [isCanceling, setIsCanceling] = useState(false);
 
-  useEffect(() => {
-    if (!user) {
-      setLoading(false);
-      return;
+  const handleCancelSubscription = async () => {
+    if (!user) return;
+
+    const confirmed = confirm(
+      'Are you sure you want to downgrade to Basic? You will lose access to premium content.'
+    );
+
+    if (!confirmed) return;
+
+    setIsCanceling(true);
+
+    try {
+      await setDoc(
+        doc(db, 'users', user.uid),
+        {
+          subscriptionType: 'basic',
+          updatedAt: new Date().toISOString(),
+        },
+        { merge: true }
+      );
+
+      await refreshSubscription();
+      alert('Successfully downgraded to Basic plan.');
+    } catch (error) {
+      console.error('Error canceling subscription:', error);
+      alert('Failed to cancel subscription. Please try again.');
+    } finally {
+      setIsCanceling(false);
     }
-
-    setTimeout(() => {
-      setSubscription('Basic');
-      setLoading(false);
-    }, 500);
-  }, [user]);
+  };
 
   if (loading) {
     return (
@@ -113,6 +133,19 @@ export default function SettingsPage() {
     );
   }
 
+  const getPlanDisplay = () => {
+    switch (subscriptionType) {
+      case 'premium':
+        return { name: 'Premium', color: '#2563eb', billing: 'Billed monthly' };
+      case 'premium-plus':
+        return { name: 'Premium Plus', color: '#7c3aed', billing: 'Billed yearly' };
+      default:
+        return { name: 'Basic', color: '#6b7280', billing: 'Free plan' };
+    }
+  };
+
+  const planInfo = getPlanDisplay();
+
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
       <div style={{
@@ -161,36 +194,21 @@ export default function SettingsPage() {
                   color: '#374151',
                 }}>
                   <span style={{ fontWeight: '600' }}>Plan: </span>
-                  <span style={{ color: '#2563eb', textTransform: 'capitalize' }}>
-                    {subscription}
+                  <span style={{
+                    color: planInfo.color,
+                    fontWeight: '600',
+                  }}>
+                    {planInfo.name}
                   </span>
                 </p>
-                {subscription === 'Basic' && (
-                  <p style={{
-                    color: '#6b7280',
-                    fontSize: '0.875rem',
-                  }}>
-                    Upgrade to Premium to unlock all features
-                  </p>
-                )}
-                {subscription === 'Premium' && (
-                  <p style={{
-                    color: '#6b7280',
-                    fontSize: '0.875rem',
-                  }}>
-                    Billed monthly
-                  </p>
-                )}
-                {subscription === 'Premium Plus' && (
-                  <p style={{
-                    color: '#6b7280',
-                    fontSize: '0.875rem',
-                  }}>
-                    Billed yearly with benefits
-                  </p>
-                )}
+                <p style={{
+                  color: '#6b7280',
+                  fontSize: '0.875rem',
+                }}>
+                  {planInfo.billing}
+                </p>
               </div>
-              {subscription === 'Basic' && (
+              {subscriptionType === 'basic' && (
                 <button
                   onClick={() => router.push('/choose-plan')}
                   style={{
@@ -209,23 +227,28 @@ export default function SettingsPage() {
                   Upgrade to Premium
                 </button>
               )}
-              {(subscription === 'Premium' || subscription === 'Premium Plus') && (
+              {(subscriptionType === 'premium' || subscriptionType === 'premium-plus') && (
                 <button
-                  onClick={() => alert('Cancel subscription functionality coming soon')}
+                  onClick={handleCancelSubscription}
+                  disabled={isCanceling}
                   style={{
-                    backgroundColor: '#dc2626',
+                    backgroundColor: isCanceling ? '#9ca3af' : '#dc2626',
                     color: 'white',
                     padding: '8px 24px',
                     borderRadius: '8px',
                     fontWeight: '600',
                     border: 'none',
-                    cursor: 'pointer',
+                    cursor: isCanceling ? 'not-allowed' : 'pointer',
                     fontSize: '1rem',
                   }}
-                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#b91c1c'}
-                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#dc2626'}
+                  onMouseOver={(e) => {
+                    if (!isCanceling) e.currentTarget.style.backgroundColor = '#b91c1c';
+                  }}
+                  onMouseOut={(e) => {
+                    if (!isCanceling) e.currentTarget.style.backgroundColor = '#dc2626';
+                  }}
                 >
-                  Manage Subscription
+                  {isCanceling ? 'Canceling...' : 'Downgrade to Basic'}
                 </button>
               )}
             </div>

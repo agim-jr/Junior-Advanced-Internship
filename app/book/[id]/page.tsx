@@ -25,7 +25,7 @@ interface Book {
 }
 
 export default function BookPage() {
-  const { user, loading: authLoading, openAuthModal } = useAuth();
+  const { user, loading: authLoading, openAuthModal, subscriptionType } = useAuth();
   const router = useRouter();
   const params = useParams();
   const bookId = params.id as string;
@@ -33,7 +33,7 @@ export default function BookPage() {
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [isSaved, setIsSaved] = useState(false); // NEW STATE
+  const [isSaved, setIsSaved] = useState(false);
 
   useEffect(() => {
     async function fetchBook() {
@@ -79,7 +79,7 @@ export default function BookPage() {
       return;
     }
 
-    if (book?.subscriptionRequired) {
+    if (book?.subscriptionRequired && subscriptionType === 'basic') {
       router.push('/choose-plan');
       return;
     }
@@ -165,6 +165,10 @@ export default function BookPage() {
     );
   }
 
+  const hasAccess = !book.subscriptionRequired ||
+                    subscriptionType === 'premium' ||
+                    subscriptionType === 'premium-plus';
+
   return (
     <div style={{
       minHeight: '100vh',
@@ -199,6 +203,57 @@ export default function BookPage() {
             ← Back
           </button>
 
+          {book.subscriptionRequired && !hasAccess && (
+            <div style={{
+              backgroundColor: '#fef3c7',
+              border: '2px solid #fbbf24',
+              borderRadius: '8px',
+              padding: '16px 24px',
+              marginBottom: '24px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                <span style={{ fontSize: '1.5rem' }}>🔒</span>
+                <div>
+                  <p style={{
+                    fontWeight: '600',
+                    color: '#78350f',
+                    marginBottom: '4px',
+                  }}>
+                    Premium Content
+                  </p>
+                  <p style={{
+                    fontSize: '0.875rem',
+                    color: '#92400e'
+                  }}>
+                    Upgrade to Premium to access this book
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => router.push('/choose-plan')}
+                style={{
+                  backgroundColor: '#2563eb',
+                  color: 'white',
+                  padding: '8px 24px',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '0.875rem',
+                  fontWeight: '600',
+                }}
+                onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+                onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+              >
+                Upgrade Now
+              </button>
+            </div>
+          )}
+
           <div style={{
             backgroundColor: 'white',
             borderRadius: '8px',
@@ -211,7 +266,7 @@ export default function BookPage() {
               gap: '32px',
             }}
             className="book-info-layout">
-              <div style={{ flexShrink: 0 }}>
+              <div style={{ flexShrink: 0, position: 'relative' }}>
                 <img
                   src={book.imageLink}
                   alt={book.title}

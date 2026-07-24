@@ -2,11 +2,16 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useAuth } from '@/context/AuthContext';
+import { doc, setDoc } from 'firebase/firestore';
+import { db } from '@/lib/firebase';
 
 export default function ChoosePlanPage() {
   const router = useRouter();
+  const { user, openAuthModal, refreshSubscription } = useAuth();
   const [selectedPlan, setSelectedPlan] = useState<'yearly' | 'monthly'>('yearly');
   const [openFaq, setOpenFaq] = useState<number | null>(null);
+  const [isUpgrading, setIsUpgrading] = useState(false);
 
   const plans = {
     yearly: {
@@ -14,12 +19,14 @@ export default function ChoosePlanPage() {
       price: 99.99,
       period: 'year',
       trial: '7-day free trial included',
+      type: 'premium-plus' as const,
     },
     monthly: {
       name: 'Premium Monthly',
       price: 9.99,
       period: 'month',
       trial: 'No trial included',
+      type: 'premium' as const,
     },
   };
 
@@ -46,9 +53,48 @@ export default function ChoosePlanPage() {
     },
   ];
 
-  const handleStartTrial = () => {
-    console.log('Starting trial with plan:', selectedPlan);
-    alert('Payment integration coming soon! This would redirect to Stripe checkout.');
+  const handleStartTrial = async () => {
+    if (!user) {
+      openAuthModal();
+      return;
+    }
+
+    setIsUpgrading(true);
+
+    try {
+      const plan = plans[selectedPlan];
+      const subscriptionData: any = {
+        subscriptionType: plan.type,
+        updatedAt: new Date().toISOString(),
+      };
+
+      if (selectedPlan === 'yearly') {
+        const trialEnd = new Date();
+        trialEnd.setDate(trialEnd.getDate() + 7);
+        subscriptionData.trialEndsAt = trialEnd.toISOString();
+      }
+
+      await setDoc(
+        doc(db, 'users', user.uid),
+        subscriptionData,
+        { merge: true }
+      );
+
+      await refreshSubscription();
+
+      alert(
+        selectedPlan === 'yearly'
+          ? '🎉 Success! Your 7-day free trial has started. Enjoy Premium Plus!'
+          : '🎉 Success! You now have Premium access. Enjoy!'
+      );
+
+      router.push('/settings');
+    } catch (error) {
+      console.error('Error upgrading subscription:', error);
+      alert('Failed to upgrade. Please try again.');
+    } finally {
+      setIsUpgrading(false);
+    }
   };
 
   return (
@@ -290,22 +336,29 @@ export default function ChoosePlanPage() {
 
         <button
           onClick={handleStartTrial}
+          disabled={isUpgrading}
           style={{
             width: '100%',
-            backgroundColor: '#2563eb',
+            backgroundColor: isUpgrading ? '#9ca3af' : '#2563eb',
             color: 'white',
             padding: '16px',
             borderRadius: '8px',
             fontSize: '1.125rem',
             fontWeight: '600',
             border: 'none',
-            cursor: 'pointer',
+            cursor: isUpgrading ? 'not-allowed' : 'pointer',
             transition: 'background-color 0.2s',
           }}
-          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+          onMouseOver={(e) => {
+            if (!isUpgrading) e.currentTarget.style.backgroundColor = '#1d4ed8';
+          }}
+          onMouseOut={(e) => {
+            if (!isUpgrading) e.currentTarget.style.backgroundColor = '#2563eb';
+          }}
         >
-          {selectedPlan === 'yearly'
+          {isUpgrading
+            ? 'Processing...'
+            : selectedPlan === 'yearly'
             ? 'Start your free 7-day trial'
             : 'Start your subscription'}
         </button>

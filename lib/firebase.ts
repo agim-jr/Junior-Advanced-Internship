@@ -17,3 +17,11 @@ export const auth = getAuth(app);
 export const db = getFirestore(app);
 
 export default app;
+
+export interface UserData {
+  uid: string;
+  email: string;
+  subscriptionType: 'basic' | 'premium' | 'premium-plus';
+  createdAt: string;
+  trialEndsAt?: string;
+}
