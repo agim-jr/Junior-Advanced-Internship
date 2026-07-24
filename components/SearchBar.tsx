@@ -17,6 +17,8 @@ export default function SearchBar() {
   const [searchResults, setSearchResults] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [showResults, setShowResults] = useState(false);
+  const [hoveredButton, setHoveredButton] = useState<string | null>(null);
+  const [hoveredClear, setHoveredClear] = useState(false);
   const debounceTimer = useRef<NodeJS.Timeout>();
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
@@ -32,7 +34,6 @@ export default function SearchBar() {
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  // Debounced search
   useEffect(() => {
     if (debounceTimer.current) {
       clearTimeout(debounceTimer.current);
@@ -83,20 +84,75 @@ export default function SearchBar() {
   };
 
   return (
-    <div ref={searchRef} className="relative w-full max-w-2xl">
-      <div className="relative">
-        <FiSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+    <div
+      ref={searchRef}
+      style={{
+        position: 'relative',
+        width: '100%',
+        maxWidth: '768px',
+        margin: '0 auto',
+      }}
+    >
+      <div style={{ position: 'relative' }}>
+        <div
+          style={{
+            position: 'absolute',
+            left: '16px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: '#9ca3af',
+            pointerEvents: 'none',
+          }}
+        >
+          <FiSearch size={20} />
+        </div>
+
         <input
           type="text"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search for books or authors..."
-          className="w-full pl-12 pr-12 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+          style={{
+            width: '100%',
+            paddingLeft: '48px',
+            paddingRight: '48px',
+            paddingTop: '12px',
+            paddingBottom: '12px',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            outline: 'none',
+            backgroundColor: 'white',
+            fontSize: '1rem',
+          }}
+          onFocus={(e) => {
+            e.target.style.borderColor = '#3b82f6';
+            e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = '#d1d5db';
+            e.target.style.boxShadow = 'none';
+          }}
         />
+
         {searchQuery && (
           <button
             onClick={clearSearch}
-            className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+            onMouseEnter={() => setHoveredClear(true)}
+            onMouseLeave={() => setHoveredClear(false)}
+            style={{
+              position: 'absolute',
+              right: '16px',
+              top: '50%',
+              transform: 'translateY(-50%)',
+              color: hoveredClear ? '#4b5563' : '#9ca3af',
+              transition: 'color 0.2s',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              padding: 0,
+              display: 'flex',
+              alignItems: 'center',
+            }}
           >
             <FiX size={20} />
           </button>
@@ -104,30 +160,109 @@ export default function SearchBar() {
       </div>
 
       {showResults && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg max-h-96 overflow-y-auto z-50">
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            left: 0,
+            right: 0,
+            marginTop: '8px',
+            backgroundColor: 'white',
+            border: '1px solid #e5e7eb',
+            borderRadius: '8px',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            maxHeight: '384px',
+            overflowY: 'auto',
+            zIndex: 50,
+          }}
+        >
           {isLoading ? (
-            <div className="p-8 text-center text-gray-500">Searching...</div>
+            <div
+              style={{
+                padding: '32px',
+                textAlign: 'center',
+              }}
+            >
+              <div
+                style={{
+                  width: '32px',
+                  height: '32px',
+                  border: '2px solid #e5e7eb',
+                  borderTopColor: '#2563eb',
+                  borderRadius: '50%',
+                  margin: '0 auto 8px',
+                  animation: 'spin 1s linear infinite',
+                }}
+              />
+              <p style={{ color: '#6b7280' }}>Searching...</p>
+            </div>
           ) : searchResults.length > 0 ? (
-            <div className="py-2">
+            <div style={{ padding: '8px 0' }}>
               {searchResults.map((book) => (
                 <button
                   key={book.id}
                   onClick={() => handleBookClick(book.id)}
-                  className="w-full px-4 py-3 flex items-center gap-4 hover:bg-gray-50 transition"
+                  onMouseEnter={() => setHoveredButton(book.id)}
+                  onMouseLeave={() => setHoveredButton(null)}
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '16px',
+                    backgroundColor: hoveredButton === book.id ? '#f9fafb' : 'transparent',
+                    transition: 'background-color 0.2s',
+                    border: 'none',
+                    cursor: 'pointer',
+                    textAlign: 'left',
+                  }}
                 >
                   <img
                     src={book.imageLink}
                     alt={book.title}
-                    className="w-12 h-16 object-cover rounded"
+                    style={{
+                      width: '48px',
+                      height: '64px',
+                      objectFit: 'cover',
+                      borderRadius: '4px',
+                      boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)',
+                    }}
                   />
-                  <div className="flex-1 text-left">
-                    <h3 className="font-semibold text-gray-900 line-clamp-1">
+
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <h3
+                      style={{
+                        fontWeight: '600',
+                        color: '#111827',
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        marginBottom: '4px',
+                      }}
+                    >
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-600">{book.author}</p>
+                    <p
+                      style={{
+                        fontSize: '0.875rem',
+                        color: '#4b5563',
+                      }}
+                    >
+                      {book.author}
+                    </p>
                   </div>
+
                   {book.subscriptionRequired && (
-                    <span className="px-2 py-1 bg-yellow-100 text-yellow-800 text-xs rounded">
+                    <span
+                      style={{
+                        padding: '4px 8px',
+                        backgroundColor: '#fef3c7',
+                        color: '#92400e',
+                        fontSize: '0.75rem',
+                        fontWeight: '500',
+                        borderRadius: '4px',
+                      }}
+                    >
                       Premium
                     </span>
                   )}
@@ -135,12 +270,30 @@ export default function SearchBar() {
               ))}
             </div>
           ) : (
-            <div className="p-8 text-center text-gray-500">
-              No books found for "{searchQuery}"
+            <div
+              style={{
+                padding: '32px',
+                textAlign: 'center',
+                color: '#6b7280',
+              }}
+            >
+              No books found for "
+              <span style={{ fontWeight: '600' }}>{searchQuery}</span>"
             </div>
           )}
         </div>
       )}
+
+      <style jsx>{`
+        @keyframes spin {
+          from {
+            transform: rotate(0deg);
+          }
+          to {
+            transform: rotate(360deg);
+          }
+        }
+      `}</style>
     </div>
   );
 }

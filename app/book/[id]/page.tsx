@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useParams } from 'next/navigation';
+import SkeletonBookDetail from '@/components/SkeletonBookDetail';
 
 interface Book {
   id: string;
@@ -83,18 +84,9 @@ export default function BookPage() {
     alert('Added to library! (Feature coming soon)');
   };
 
+  // Show skeleton while loading
   if (isLoading || authLoading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 'auto',
-      }}>
-        <div style={{ fontSize: '1.25rem' }}>Loading book...</div>
-      </div>
-    );
+    return <SkeletonBookDetail />;
   }
 
   if (error || !book) {

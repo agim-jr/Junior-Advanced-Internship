@@ -3,6 +3,9 @@
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import SearchBar from '@/components/SearchBar';
+import SkeletonSelectedBook from '@/components/SkeletonSelectedBook';
+import SkeletonBookCard from '@/components/SkeletonBookCard';
 
 interface Book {
   id: string;
@@ -76,12 +79,109 @@ export default function ForYouPage() {
     return (
       <div style={{
         minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: 'auto',
+        backgroundColor: '#f9fafb',
       }}>
-        <div style={{ fontSize: '1.25rem' }}>Loading...</div>
+        <div style={{
+          marginLeft: '256px',
+          transition: 'margin-left 0.3s ease',
+        }}
+        className="for-you-content">
+          <div style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 20,
+            backgroundColor: 'white',
+            borderBottom: '1px solid #e5e7eb',
+            padding: '16px',
+          }}>
+            <div style={{
+              maxWidth: '1280px',
+              margin: '0 auto',
+            }}>
+              <div style={{
+                height: '40px',
+                backgroundColor: '#e5e7eb',
+                borderRadius: '8px',
+                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              }} />
+            </div>
+          </div>
+
+          <div style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+            padding: '32px 16px',
+          }}>
+            <section style={{ marginBottom: '48px' }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                marginBottom: '24px',
+                color: '#111827',
+              }}>
+                Selected just for you
+              </h2>
+              <SkeletonSelectedBook />
+            </section>
+
+            <section style={{ marginBottom: '48px' }}>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                marginBottom: '24px',
+                color: '#111827',
+              }}>
+                Recommended For You
+              </h2>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: '16px',
+              }}>
+                {[...Array(8)].map((_, i) => (
+                  <SkeletonBookCard key={i} />
+                ))}
+              </div>
+            </section>
+
+            <section>
+              <h2 style={{
+                fontSize: '1.5rem',
+                fontWeight: 'bold',
+                marginBottom: '24px',
+                color: '#111827',
+              }}>
+                Suggested Books
+              </h2>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(150px, 1fr))',
+                gap: '16px',
+              }}>
+                {[...Array(8)].map((_, i) => (
+                  <SkeletonBookCard key={i} />
+                ))}
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <style jsx>{`
+          @keyframes pulse {
+            0%, 100% {
+              opacity: 1;
+            }
+            50% {
+              opacity: 0.5;
+            }
+          }
+          @media (max-width: 1024px) {
+            .for-you-content {
+              margin-left: 0 !important;
+              padding-top: 60px;
+            }
+          }
+        `}</style>
       </div>
     );
   }
@@ -95,18 +195,32 @@ export default function ForYouPage() {
       minHeight: '100vh',
       backgroundColor: '#f9fafb',
     }}>
-      {/* Main content wrapper with proper offset for sidebar */}
       <div style={{
-        marginLeft: '256px', // Desktop sidebar width
+        marginLeft: '256px',
         transition: 'margin-left 0.3s ease',
       }}
       className="for-you-content">
+        <div style={{
+          position: 'sticky',
+          top: 0,
+          zIndex: 20,
+          backgroundColor: 'white',
+          borderBottom: '1px solid #e5e7eb',
+          padding: '16px',
+        }}>
+          <div style={{
+            maxWidth: '1280px',
+            margin: '0 auto',
+          }}>
+            <SearchBar />
+          </div>
+        </div>
+
         <div style={{
           maxWidth: '1280px',
           margin: '0 auto',
           padding: '32px 16px',
         }}>
-          {/* Selected Book Section */}
           <section style={{ marginBottom: '48px' }}>
             <h2 style={{
               fontSize: '1.5rem',
@@ -186,7 +300,6 @@ export default function ForYouPage() {
             )}
           </section>
 
-          {/* Recommended Books Section */}
           <section style={{ marginBottom: '48px' }}>
             <h2 style={{
               fontSize: '1.5rem',
@@ -254,7 +367,6 @@ export default function ForYouPage() {
             </div>
           </section>
 
-          {/* Suggested Books Section */}
           <section>
             <h2 style={{
               fontSize: '1.5rem',
@@ -324,7 +436,6 @@ export default function ForYouPage() {
         </div>
       </div>
 
-      {/* Responsive styles */}
       <style jsx>{`
         @media (max-width: 1024px) {
           .for-you-content {

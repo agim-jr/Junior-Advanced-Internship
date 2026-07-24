@@ -3,6 +3,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useParams } from 'next/navigation';
+import SkeletonPlayer from '@/components/SkeletonPlayer';
 
 interface Book {
   id: string;
@@ -140,19 +141,7 @@ export default function PlayerPage() {
   };
 
   if (isLoading || authLoading) {
-    return (
-      <div style={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        marginLeft: '256px',
-        transition: 'margin-left 0.3s ease',
-      }}
-      className="loading-container">
-        <div style={{ fontSize: '1.25rem' }}>Loading...</div>
-      </div>
-    );
+    return <SkeletonPlayer />;
   }
 
   if (error || !book || !user) {
@@ -192,6 +181,13 @@ export default function PlayerPage() {
             Back to Home
           </button>
         </div>
+        <style jsx>{`
+          @media (max-width: 1024px) {
+            .error-container {
+              margin-left: 0 !important;
+            }
+          }
+        `}</style>
       </div>
     );
   }
@@ -551,8 +547,6 @@ export default function PlayerPage() {
 
       <style jsx>{`
         @media (max-width: 1024px) {
-          .loading-container,
-          .error-container,
           .header-content,
           .main-content {
             margin-left: 0 !important;
