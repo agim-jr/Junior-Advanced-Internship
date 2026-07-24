@@ -11,7 +11,7 @@ import { BiCrown } from "react-icons/bi";
 import { BsStarFill, BsStarHalf } from "react-icons/bs";
 import { RiLeafLine } from "react-icons/ri";
 import AuthModal from "@/components/modals/AuthModal";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAuth } from "@/context/AuthContext";
 
 export default function Home() {
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
@@ -19,7 +19,7 @@ export default function Home() {
 
   return (
     <>
-      
+
       <nav className="nav">
         <div className="nav__wrapper">
           <figure className="nav__img--mask">

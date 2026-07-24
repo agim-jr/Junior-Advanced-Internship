@@ -52,77 +52,165 @@ export default function ChoosePlanPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow">
-        <div className="max-w-6xl mx-auto px-4 py-4">
+    <div style={{ minHeight: '100vh', backgroundColor: '#f9fafb' }}>
+      <div style={{
+        backgroundColor: 'white',
+        boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+      }}>
+        <div style={{
+          maxWidth: '1152px',
+          margin: '0 auto',
+          padding: '16px',
+        }}>
           <button
             onClick={() => router.push('/for-you')}
-            className="text-blue-600 hover:text-blue-800"
+            style={{
+              color: '#2563eb',
+              backgroundColor: 'transparent',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1rem',
+            }}
+            onMouseOver={(e) => e.currentTarget.style.color = '#1e40af'}
+            onMouseOut={(e) => e.currentTarget.style.color = '#2563eb'}
           >
             ← Back to Home
           </button>
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 py-12 text-center">
-        <h1 className="text-4xl font-bold mb-4">
+      <div style={{
+        maxWidth: '896px',
+        margin: '0 auto',
+        padding: '48px 16px',
+        textAlign: 'center',
+      }}>
+        <h1 style={{
+          fontSize: '2.25rem',
+          fontWeight: 'bold',
+          marginBottom: '16px',
+          color: '#111827',
+        }}>
           Get unlimited access to many amazing books to read
         </h1>
-        <p className="text-xl text-gray-600 mb-2">
+        <p style={{
+          fontSize: '1.25rem',
+          color: '#6b7280',
+          marginBottom: '8px',
+        }}>
           Turn ordinary moments into amazing learning opportunities
         </p>
-        <div className="flex items-center justify-center gap-8 mt-8 text-gray-700">
-          <div>
-            <div className="text-3xl mb-2">📚</div>
-            <p className="text-sm">Key ideas in few min with many books to read</p>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '32px',
+          marginTop: '32px',
+          color: '#374151',
+          flexWrap: 'wrap',
+        }}>
+          <div style={{ maxWidth: '200px' }}>
+            <div style={{ fontSize: '1.875rem', marginBottom: '8px' }}>📚</div>
+            <p style={{ fontSize: '0.875rem' }}>
+              Key ideas in few min with many books to read
+            </p>
           </div>
-          <div>
-            <div className="text-3xl mb-2">👥</div>
-            <p className="text-sm">
+          <div style={{ maxWidth: '200px' }}>
+            <div style={{ fontSize: '1.875rem', marginBottom: '8px' }}>👥</div>
+            <p style={{ fontSize: '0.875rem' }}>
               <strong>3 million</strong> people growing with Summarist everyday
             </p>
           </div>
-          <div>
-            <div className="text-3xl mb-2">🎯</div>
-            <p className="text-sm">Precise recommendations collections curated by experts</p>
+          <div style={{ maxWidth: '200px' }}>
+            <div style={{ fontSize: '1.875rem', marginBottom: '8px' }}>🎯</div>
+            <p style={{ fontSize: '0.875rem' }}>
+              Precise recommendations collections curated by experts
+            </p>
           </div>
         </div>
       </div>
 
-      <div className="max-w-2xl mx-auto px-4 pb-12">
-        <h2 className="text-3xl font-bold text-center mb-8">
+      <div style={{
+        maxWidth: '672px',
+        margin: '0 auto',
+        padding: '0 16px 48px',
+      }}>
+        <h2 style={{
+          fontSize: '1.875rem',
+          fontWeight: 'bold',
+          textAlign: 'center',
+          marginBottom: '32px',
+          color: '#111827',
+        }}>
           Choose the plan that fits you
         </h2>
 
-        <div className="space-y-4 mb-8">
+        <div style={{ marginBottom: '32px' }}>
           <div
             onClick={() => setSelectedPlan('yearly')}
-            className={`bg-white rounded-lg p-6 cursor-pointer transition border-2 ${
-              selectedPlan === 'yearly'
-                ? 'border-blue-600 shadow-lg'
-                : 'border-gray-200'
-            }`}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '24px',
+              cursor: 'pointer',
+              border: selectedPlan === 'yearly' ? '2px solid #2563eb' : '2px solid #e5e7eb',
+              boxShadow: selectedPlan === 'yearly' ? '0 10px 15px rgba(0,0,0,0.1)' : 'none',
+              marginBottom: '16px',
+              transition: 'all 0.2s',
+            }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedPlan === 'yearly'
-                      ? 'border-blue-600'
-                      : 'border-gray-300'
-                  }`}
-                >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+              }}>
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  border: selectedPlan === 'yearly' ? '2px solid #2563eb' : '2px solid #d1d5db',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                   {selectedPlan === 'yearly' && (
-                    <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#2563eb',
+                      borderRadius: '50%',
+                    }}></div>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">{plans.yearly.name}</h3>
-                  <p className="text-green-600 text-sm">{plans.yearly.trial}</p>
+                  <h3 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    color: '#111827',
+                  }}>
+                    {plans.yearly.name}
+                  </h3>
+                  <p style={{
+                    color: '#16a34a',
+                    fontSize: '0.875rem',
+                  }}>
+                    {plans.yearly.trial}
+                  </p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                }}>
                   ${plans.yearly.price}/{plans.yearly.period}
                 </div>
               </div>
@@ -131,32 +219,68 @@ export default function ChoosePlanPage() {
 
           <div
             onClick={() => setSelectedPlan('monthly')}
-            className={`bg-white rounded-lg p-6 cursor-pointer transition border-2 ${
-              selectedPlan === 'monthly'
-                ? 'border-blue-600 shadow-lg'
-                : 'border-gray-200'
-            }`}
+            style={{
+              backgroundColor: 'white',
+              borderRadius: '8px',
+              padding: '24px',
+              cursor: 'pointer',
+              border: selectedPlan === 'monthly' ? '2px solid #2563eb' : '2px solid #e5e7eb',
+              boxShadow: selectedPlan === 'monthly' ? '0 10px 15px rgba(0,0,0,0.1)' : 'none',
+              transition: 'all 0.2s',
+            }}
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div
-                  className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                    selectedPlan === 'monthly'
-                      ? 'border-blue-600'
-                      : 'border-gray-300'
-                  }`}
-                >
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              flexWrap: 'wrap',
+              gap: '16px',
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '16px',
+              }}>
+                <div style={{
+                  width: '24px',
+                  height: '24px',
+                  borderRadius: '50%',
+                  border: selectedPlan === 'monthly' ? '2px solid #2563eb' : '2px solid #d1d5db',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
                   {selectedPlan === 'monthly' && (
-                    <div className="w-3 h-3 bg-blue-600 rounded-full"></div>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#2563eb',
+                      borderRadius: '50%',
+                    }}></div>
                   )}
                 </div>
                 <div>
-                  <h3 className="text-xl font-bold">{plans.monthly.name}</h3>
-                  <p className="text-gray-600 text-sm">{plans.monthly.trial}</p>
+                  <h3 style={{
+                    fontSize: '1.25rem',
+                    fontWeight: 'bold',
+                    color: '#111827',
+                  }}>
+                    {plans.monthly.name}
+                  </h3>
+                  <p style={{
+                    color: '#6b7280',
+                    fontSize: '0.875rem',
+                  }}>
+                    {plans.monthly.trial}
+                  </p>
                 </div>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold">
+              <div style={{ textAlign: 'right' }}>
+                <div style={{
+                  fontSize: '1.5rem',
+                  fontWeight: 'bold',
+                  color: '#111827',
+                }}>
                   ${plans.monthly.price}/{plans.monthly.period}
                 </div>
               </div>
@@ -166,33 +290,88 @@ export default function ChoosePlanPage() {
 
         <button
           onClick={handleStartTrial}
-          className="w-full bg-blue-600 text-white py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition"
+          style={{
+            width: '100%',
+            backgroundColor: '#2563eb',
+            color: 'white',
+            padding: '16px',
+            borderRadius: '8px',
+            fontSize: '1.125rem',
+            fontWeight: '600',
+            border: 'none',
+            cursor: 'pointer',
+            transition: 'background-color 0.2s',
+          }}
+          onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
+          onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
         >
           {selectedPlan === 'yearly'
             ? 'Start your free 7-day trial'
             : 'Start your subscription'}
         </button>
 
-        <p className="text-center text-gray-600 text-sm mt-4">
+        <p style={{
+          textAlign: 'center',
+          color: '#6b7280',
+          fontSize: '0.875rem',
+          marginTop: '16px',
+        }}>
           {selectedPlan === 'yearly' &&
             "Cancel your trial at any time before it ends, and you won't be charged."}
         </p>
 
-        <div className="mt-12">
-          <div className="space-y-4">
+        <div style={{ marginTop: '48px' }}>
+          <div>
             {faqs.map((faq, index) => (
-              <div key={index} className="bg-white rounded-lg overflow-hidden">
+              <div
+                key={index}
+                style={{
+                  backgroundColor: 'white',
+                  borderRadius: '8px',
+                  overflow: 'hidden',
+                  marginBottom: '16px',
+                }}
+              >
                 <button
                   onClick={() => setOpenFaq(openFaq === index ? null : index)}
-                  className="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50"
+                  style={{
+                    width: '100%',
+                    padding: '16px 24px',
+                    textAlign: 'left',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    backgroundColor: 'white',
+                    border: 'none',
+                    cursor: 'pointer',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#f9fafb'}
+                  onMouseOut={(e) => e.currentTarget.style.backgroundColor = 'white'}
                 >
-                  <span className="font-semibold">{faq.question}</span>
-                  <span className="text-2xl">
+                  <span style={{
+                    fontWeight: '600',
+                    color: '#111827',
+                    flex: 1,
+                    paddingRight: '16px',
+                  }}>
+                    {faq.question}
+                  </span>
+                  <span style={{
+                    fontSize: '1.5rem',
+                    color: '#6b7280',
+                  }}>
                     {openFaq === index ? '−' : '+'}
                   </span>
                 </button>
                 {openFaq === index && (
-                  <div className="px-6 pb-4 text-gray-600">{faq.answer}</div>
+                  <div style={{
+                    padding: '0 24px 16px',
+                    color: '#6b7280',
+                    lineHeight: '1.6',
+                  }}>
+                    {faq.answer}
+                  </div>
                 )}
               </div>
             ))}

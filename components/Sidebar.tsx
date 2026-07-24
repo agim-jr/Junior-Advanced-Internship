@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth } from '@/context/AuthContext';
 import { FiHome, FiBookmark, FiEdit3, FiSearch, FiSettings, FiHelpCircle, FiLogIn, FiLogOut, FiMenu, FiX } from 'react-icons/fi';
 
 export default function Sidebar() {
