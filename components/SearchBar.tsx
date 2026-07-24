@@ -19,7 +19,7 @@ export default function SearchBar() {
   const [showResults, setShowResults] = useState(false);
   const [hoveredButton, setHoveredButton] = useState<string | null>(null);
   const [hoveredClear, setHoveredClear] = useState(false);
-  const debounceTimer = useRef<NodeJS.Timeout | null>(null); // Fixed here
+  const debounceTimer = useRef<NodeJS.Timeout | null>(null);
   const searchRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
@@ -83,6 +83,18 @@ export default function SearchBar() {
     setShowResults(false);
   };
 
+  const [pulseOpacity, setPulseOpacity] = useState(1);
+
+  useEffect(() => {
+    if (!isLoading) return;
+
+    const interval = setInterval(() => {
+      setPulseOpacity(prev => prev === 1 ? 0.5 : 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isLoading]);
+
   const SearchSkeleton = () => (
     <div style={{ padding: '8px 0' }}>
       {[...Array(5)].map((_, index) => (
@@ -101,7 +113,8 @@ export default function SearchBar() {
               height: '64px',
               backgroundColor: '#e5e7eb',
               borderRadius: '4px',
-              animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+              opacity: pulseOpacity,
+              transition: 'opacity 1s cubic-bezier(0.4, 0, 0.6, 1)',
             }}
           />
 
@@ -113,7 +126,8 @@ export default function SearchBar() {
                 backgroundColor: '#e5e7eb',
                 borderRadius: '4px',
                 marginBottom: '8px',
-                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                opacity: pulseOpacity,
+                transition: 'opacity 1s cubic-bezier(0.4, 0, 0.6, 1)',
               }}
             />
             <div
@@ -122,7 +136,8 @@ export default function SearchBar() {
                 width: '50%',
                 backgroundColor: '#e5e7eb',
                 borderRadius: '4px',
-                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                opacity: pulseOpacity,
+                transition: 'opacity 1s cubic-bezier(0.4, 0, 0.6, 1)',
               }}
             />
           </div>
@@ -134,7 +149,8 @@ export default function SearchBar() {
                 height: '24px',
                 backgroundColor: '#e5e7eb',
                 borderRadius: '4px',
-                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                opacity: pulseOpacity,
+                transition: 'opacity 1s cubic-bezier(0.4, 0, 0.6, 1)',
               }}
             />
           )}
@@ -325,17 +341,6 @@ export default function SearchBar() {
           )}
         </div>
       )}
-
-      <style jsx>{`
-        @keyframes pulse {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.5;
-          }
-        }
-      `}</style>
     </div>
   );
 }

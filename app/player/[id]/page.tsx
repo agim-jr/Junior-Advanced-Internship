@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth } from '@/context/AuthContext';
 import { useRouter, useParams } from 'next/navigation';
 import SkeletonPlayer from '@/components/SkeletonPlayer';
@@ -30,6 +30,7 @@ export default function PlayerPage() {
   const params = useParams();
   const bookId = params.id as string;
   const audioRef = useRef<HTMLAudioElement>(null);
+  const seekingRef = useRef(false); // Track if user is actively seeking
 
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -39,6 +40,7 @@ export default function PlayerPage() {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
+  const [isAudioReady, setIsAudioReady] = useState(false); // Track audio readiness
 
   const [activeTab, setActiveTab] = useState<'summary' | 'audio'>('summary');
 
@@ -75,33 +77,71 @@ export default function PlayerPage() {
     }
   }, [bookId]);
 
-  // Fixed: Add book.audioLink to dependency array
+  // Fixed: Better audio event handling with proper cleanup
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio || !book?.audioLink) return;
 
-    const updateTime = () => setCurrentTime(audio.currentTime);
-    const updateDuration = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
+    // Reset state when audio source changes
+    setIsAudioReady(false);
+    setIsPlaying(false);
+    setCurrentTime(0);
+    setDuration(0);
 
+    const updateTime = () => {
+      if (!seekingRef.current && audio) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
+
+    const updateDuration = () => {
+      if (audio && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+        setIsAudioReady(true);
+      }
+    };
+
+    const handleCanPlay = () => {
+      setIsAudioReady(true);
+      if (audio && isFinite(audio.duration)) {
+        setDuration(audio.duration);
+      }
+    };
+
+    const handleEnded = () => {
+      setIsPlaying(false);
+      setCurrentTime(0);
+    };
+
+    const handleError = (e: Event) => {
+      console.error('Audio error:', e);
+      setIsAudioReady(false);
+      setError('Failed to load audio file');
+    };
+
+    // Add all event listeners
     audio.addEventListener('timeupdate', updateTime);
     audio.addEventListener('loadedmetadata', updateDuration);
+    audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('ended', handleEnded);
+    audio.addEventListener('error', handleError);
 
-    // Force load metadata
+    // Load the audio
     audio.load();
 
     return () => {
       audio.removeEventListener('timeupdate', updateTime);
       audio.removeEventListener('loadedmetadata', updateDuration);
+      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('ended', handleEnded);
+      audio.removeEventListener('error', handleError);
+      audio.pause();
     };
-  }, [book?.audioLink]); // Changed dependency
+  }, [book?.audioLink]);
 
-  // Fixed: Handle promise rejection
-  const togglePlayPause = async () => {
+  const togglePlayPause = useCallback(async () => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !isAudioReady) return;
 
     try {
       if (isPlaying) {
@@ -115,39 +155,52 @@ export default function PlayerPage() {
       console.error('Error playing audio:', error);
       setIsPlaying(false);
     }
+  }, [isPlaying, isAudioReady]);
+
+  // Fixed: Proper seek handling with mousedown/mouseup events
+  const handleSeekStart = () => {
+    seekingRef.current = true;
   };
 
-  const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSeekEnd = (e: React.ChangeEvent<HTMLInputElement>) => {
     const audio = audioRef.current;
-    if (!audio) return;
+    if (!audio || !isAudioReady) return;
 
     const newTime = parseFloat(e.target.value);
     audio.currentTime = newTime;
     setCurrentTime(newTime);
+    seekingRef.current = false;
   };
 
-  const skip = (seconds: number) => {
+  const handleSeekChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    // Update UI immediately while dragging
+    setCurrentTime(parseFloat(e.target.value));
+  };
+
+  // Fixed: Better skip function with boundary checks
+  const skip = useCallback((seconds: number) => {
+    const audio = audioRef.current;
+    if (!audio || !isAudioReady || !isFinite(duration)) return;
+
+    const newTime = Math.max(0, Math.min(duration, audio.currentTime + seconds));
+    audio.currentTime = newTime;
+    setCurrentTime(newTime);
+  }, [duration, isAudioReady]);
+
+  const changeSpeed = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const newTime = audio.currentTime + seconds;
-    audio.currentTime = Math.max(0, Math.min(duration, newTime));
-    setCurrentTime(audio.currentTime); // Added: Update state immediately
-  };
-
-  const changeSpeed = () => {
     const speeds = [0.5, 0.75, 1, 1.25, 1.5, 2];
     const currentIndex = speeds.indexOf(playbackRate);
     const nextSpeed = speeds[(currentIndex + 1) % speeds.length];
 
     setPlaybackRate(nextSpeed);
-    if (audioRef.current) {
-      audioRef.current.playbackRate = nextSpeed;
-    }
-  };
+    audio.playbackRate = nextSpeed;
+  }, [playbackRate]);
 
   const formatTime = (seconds: number) => {
-    if (isNaN(seconds) || !isFinite(seconds)) return '0:00'; // Added isFinite check
+    if (isNaN(seconds) || !isFinite(seconds)) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = Math.floor(seconds % 60);
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -409,27 +462,46 @@ export default function PlayerPage() {
 
               {activeTab === 'audio' && (
                 <div>
-                  <audio ref={audioRef} src={book.audioLink} preload="metadata" />
+                  <audio
+                    ref={audioRef}
+                    src={book.audioLink}
+                    preload="metadata"
+                    crossOrigin="anonymous"
+                  />
+
+                  {!isAudioReady && (
+                    <div style={{ textAlign: 'center', color: '#6b7280', marginBottom: '16px' }}>
+                      Loading audio...
+                    </div>
+                  )}
 
                   <div style={{
                     backgroundColor: '#f3f4f6',
                     borderRadius: '8px',
                     padding: '24px',
+                    opacity: isAudioReady ? 1 : 0.5,
+                    pointerEvents: isAudioReady ? 'auto' : 'none',
                   }}>
                     <div style={{ marginBottom: '16px' }}>
                       <input
                         type="range"
                         min="0"
                         max={duration || 0}
+                        step="0.1"
                         value={currentTime}
-                        onChange={handleSeek}
+                        onChange={handleSeekChange}
+                        onMouseDown={handleSeekStart}
+                        onMouseUp={handleSeekEnd}
+                        onTouchStart={handleSeekStart}
+                        onTouchEnd={handleSeekEnd}
+                        disabled={!isAudioReady}
                         style={{
                           width: '100%',
                           height: '8px',
                           backgroundColor: '#d1d5db',
                           borderRadius: '8px',
                           appearance: 'none',
-                          cursor: 'pointer',
+                          cursor: isAudioReady ? 'pointer' : 'not-allowed',
                           accentColor: '#2563eb',
                         }}
                       />
@@ -454,15 +526,16 @@ export default function PlayerPage() {
                     }}>
                       <button
                         onClick={changeSpeed}
+                        disabled={!isAudioReady}
                         style={{
                           color: '#374151',
                           fontWeight: '600',
                           backgroundColor: 'transparent',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: isAudioReady ? 'pointer' : 'not-allowed',
                           fontSize: '1rem',
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOver={(e) => isAudioReady && (e.currentTarget.style.color = '#2563eb')}
                         onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
                       >
                         {playbackRate}x
@@ -470,14 +543,15 @@ export default function PlayerPage() {
 
                       <button
                         onClick={() => skip(-10)}
+                        disabled={!isAudioReady}
                         style={{
                           color: '#374151',
                           fontSize: '1.5rem',
                           backgroundColor: 'transparent',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: isAudioReady ? 'pointer' : 'not-allowed',
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOver={(e) => isAudioReady && (e.currentTarget.style.color = '#2563eb')}
                         onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
                       >
                         ⏪
@@ -485,10 +559,11 @@ export default function PlayerPage() {
 
                       <button
                         onClick={togglePlayPause}
+                        disabled={!isAudioReady}
                         style={{
                           width: '64px',
                           height: '64px',
-                          backgroundColor: '#2563eb',
+                          backgroundColor: isAudioReady ? '#2563eb' : '#9ca3af',
                           color: 'white',
                           borderRadius: '50%',
                           display: 'flex',
@@ -496,25 +571,26 @@ export default function PlayerPage() {
                           justifyContent: 'center',
                           fontSize: '1.875rem',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: isAudioReady ? 'pointer' : 'not-allowed',
                           transition: 'background-color 0.2s',
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#1d4ed8'}
-                        onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#2563eb'}
+                        onMouseOver={(e) => isAudioReady && (e.currentTarget.style.backgroundColor = '#1d4ed8')}
+                        onMouseOut={(e) => isAudioReady && (e.currentTarget.style.backgroundColor = '#2563eb')}
                       >
                         {isPlaying ? '⏸' : '▶'}
                       </button>
 
                       <button
                         onClick={() => skip(10)}
+                        disabled={!isAudioReady}
                         style={{
                           color: '#374151',
                           fontSize: '1.5rem',
                           backgroundColor: 'transparent',
                           border: 'none',
-                          cursor: 'pointer',
+                          cursor: isAudioReady ? 'pointer' : 'not-allowed',
                         }}
-                        onMouseOver={(e) => e.currentTarget.style.color = '#2563eb'}
+                        onMouseOver={(e) => isAudioReady && (e.currentTarget.style.color = '#2563eb')}
                         onMouseOut={(e) => e.currentTarget.style.color = '#374151'}
                       >
                         ⏩
@@ -574,6 +650,25 @@ export default function PlayerPage() {
             align-items: center;
             text-align: center;
           }
+        }
+
+        /* Fix range slider for WebKit browsers */
+        input[type="range"]::-webkit-slider-thumb {
+          appearance: none;
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+          width: 16px;
+          height: 16px;
+          border-radius: 50%;
+          background: #2563eb;
+          cursor: pointer;
+          border: none;
         }
       `}</style>
     </div>
